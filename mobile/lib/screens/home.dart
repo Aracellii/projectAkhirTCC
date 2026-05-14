@@ -133,8 +133,8 @@ class _HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _buildFeatureButton(
-                title: 'Masukan Produk',
-                subtitle: 'Tambah data produk baru',
+                title: 'Donasikan Barang',
+                subtitle: 'Tambah barang baru',
                 icon: Icons.inventory_2_rounded,
                 gradientColors: const [Color(0xFF6C63FF), Color(0xFF3ECFCF)],
                 onTap: () => Navigator.pushNamed(context, '/products'),

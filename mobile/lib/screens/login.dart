@@ -200,22 +200,7 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 12),
 
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () {},
-                      style: TextButton.styleFrom(
-                        foregroundColor: const Color(0xFF6C63FF),
-                        padding: EdgeInsets.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: const Text(
-                        'Lupa password?',
-                        style: TextStyle(fontSize: 13),
-                      ),
-                    ),
-                  ),
-
+                  
                   const SizedBox(height: 28),
 
                   // Login Button

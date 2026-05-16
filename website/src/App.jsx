@@ -1,122 +1,97 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { BrowserRouter, Routes, Route, Link, Navigate } from 'react-router-dom';
+import AdminDashboard from './AdminDashboard';
+import './App.css';
+import Login from './Login';
+import Register from './Register';
 
-function App() {
-  const [count, setCount] = useState(0)
-
+function Home() {
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div className="home-page">
+      {/* Nav */}
+      <nav className="nav">
+        <div className="nav-brand">
+          <div className="nav-logo">♻️</div>
+          <span className="nav-name">Waste<span>Pro</span></span>
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+        <span className="nav-badge">Admin Portal</span>
+      </nav>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+      {/* Hero */}
+      <section className="hero-section">
+        <div className="hero-tag">
+          <span className="hero-tag-dot" />
+          Platform Aktif
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
+
+        <h1 className="hero-title">
+          Kelola Sampah<br />
+          Lebih <em>Cerdas</em>
+        </h1>
+
+        <p className="hero-subtitle">
+          Sistem manajemen sampah terpadu untuk komunitas yang lebih bersih, 
+          hijau, dan berkelanjutan.
+        </p>
+
+        <div className="hero-actions">
+          <Link to="/login" className="btn-hero-primary">
+            Masuk ke Dashboard →
+          </Link>
+          <Link to="/register" className="btn-hero-secondary">
+            Buat Akun Baru
+          </Link>
+        </div>
+
+        {/* Stats */}
+        <div className="hero-stats">
+          <div className="stat-item">
+            <span className="stat-value">100%</span>
+            <span className="stat-label">Berbasis Web</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-value">Real-time</span>
+            <span className="stat-label">Pembaruan Data</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-value">Aman</span>
+            <span className="stat-label">JWT Auth</span>
+          </div>
         </div>
       </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      <footer className="home-footer">
+        © 2025 WastePro · Sistem Manajemen Sampah
+      </footer>
+    </div>
+  );
 }
 
-export default App
+function ProtectedRoute({ element }) {
+  const token = localStorage.getItem('token');
+  const roles = localStorage.getItem('roles');
+  
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  if (roles !== 'admin') {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return element;
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/admin" element={<ProtectedRoute element={<AdminDashboard />} />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+export default App;

@@ -8,6 +8,7 @@ export default function AdminDashboard() {
   const [locations, setLocations] = useState([]);
   const [categories, setCategories] = useState([]);
   const [editingLocation, setEditingLocation] = useState(null);
+  const [editingCategory, setEditingCategory] = useState(null);
   const [loading, setLoading] = useState(false);
   const API_BASE_URL = 'http://localhost:5000/api/v1';
 
@@ -51,6 +52,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (activeTab === 'donation-location') {
+      setEditingCategory(null);
       fetchDonationLocations();
     } else if (activeTab === 'product-category') {
       setEditingLocation(null);
@@ -79,42 +81,8 @@ export default function AdminDashboard() {
     setEditingLocation(location);
   };
 
-  const handleEditCategory = async (category) => {
-    const name = window.prompt('Nama kategori', category.name);
-    if (name === null) return;
-
-    const creditInput = window.prompt(
-      'Kredit per kg',
-      String(category.credit_per_kg ?? 0)
-    );
-    if (creditInput === null) return;
-
-    const creditValue = parseInt(creditInput, 10);
-    if (Number.isNaN(creditValue) || creditValue < 0) {
-      window.alert('Kredit per kg harus berupa angka >= 0');
-      return;
-    }
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/categories/${category.id}`, {
-        method: 'PUT',
-        headers: getAuthHeader(),
-        body: JSON.stringify({
-          name: name.trim(),
-          credit_per_kg: creditValue,
-        }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || 'Gagal update kategori');
-      }
-
-      fetchCategories();
-    } catch (error) {
-      console.error('Error updating category:', error);
-      window.alert(error.message || 'Gagal update kategori');
-    }
+  const handleEditCategory = (category) => {
+    setEditingCategory(category);
   };
 
   const handleDeleteCategory = async (id) => {
@@ -129,6 +97,10 @@ export default function AdminDashboard() {
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.message || 'Gagal menghapus kategori');
+      }
+
+      if (editingCategory?.id === id) {
+        setEditingCategory(null);
       }
 
       fetchCategories();
@@ -154,7 +126,7 @@ export default function AdminDashboard() {
       <aside className="admin-sidebar">
         <div className="sidebar-header">
           <div className="sidebar-logo">
-            <div className="sidebar-logo-icon">♻️</div>
+            <div className="sidebar-logo-icon"></div>
             <span className="sidebar-logo-text">Waste<span>Pro</span></span>
           </div>
         </div>
@@ -268,10 +240,10 @@ export default function AdminDashboard() {
                           )}
                           <div className="item-footer">
                             <button className="btn-edit" onClick={() => handleEditLocation(loc)}>
-                              ✏️ Edit
+                               Edit
                             </button>
                             <button className="btn-delete" onClick={() => handleDeleteLocation(loc.id)}>
-                              🗑️ Hapus
+                               Hapus
                             </button>
                           </div>
                         </div>
@@ -288,10 +260,16 @@ export default function AdminDashboard() {
             <div className="content-grid">
               <div className="card">
                 <div className="card-header">
-                  <span className="card-title">Tambah Kategori Baru</span>
+                  <span className="card-title">
+                    {editingCategory ? `Edit Kategori #${editingCategory.id}` : 'Tambah Kategori Baru'}
+                  </span>
                 </div>
                 <div className="card-body">
-                  <AddProductCategory onCategoryAdded={fetchCategories} />
+                  <AddProductCategory
+                    onCategoryAdded={fetchCategories}
+                    editingCategory={editingCategory}
+                    onCancelEdit={() => setEditingCategory(null)}
+                  />
                 </div>
               </div>
 
@@ -325,12 +303,12 @@ export default function AdminDashboard() {
                               {cat.credit_per_kg} kredit / kg
                             </div>
                           </div>
-                          <div className="item-footer">
+                           <div className="item-footer">
                             <button className="btn-edit" onClick={() => handleEditCategory(cat)}>
-                              ✏️ Edit
+                              Edit
                             </button>
                             <button className="btn-delete" onClick={() => handleDeleteCategory(cat.id)}>
-                              🗑️ Hapus
+                              Hapus
                             </button>
                           </div>
                         </div>

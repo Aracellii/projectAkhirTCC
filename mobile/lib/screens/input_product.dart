@@ -789,7 +789,7 @@ class _ProductFormPageState extends State<ProductFormPage>
                         const SizedBox(height: 8),
                         _inputField(
                           controller: _nameCtrl,
-                          hint: 'Contoh: Botol plastik bekas',
+                          hint: 'Masukkan nama produk ',
                           icon: Icons.inventory_2_outlined,
                           validator: (v) => (v == null || v.isEmpty)
                               ? 'Nama produk wajib diisi'
@@ -802,7 +802,7 @@ class _ProductFormPageState extends State<ProductFormPage>
                         const SizedBox(height: 8),
                         _inputField(
                           controller: _descCtrl,
-                          hint: 'Deskripsi kondisi produk (opsional)',
+                          hint: 'Deskripsi produk (opsional)',
                           icon: Icons.notes_rounded,
                           maxLines: 3,
                         ),
@@ -813,7 +813,7 @@ class _ProductFormPageState extends State<ProductFormPage>
                         const SizedBox(height: 8),
                         _inputField(
                           controller: _weightCtrl,
-                          hint: 'Contoh: 1.5',
+                          hint: 'Masukkan berat dalam kilogram',
                           icon: Icons.scale_outlined,
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,

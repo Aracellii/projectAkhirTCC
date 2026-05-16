@@ -56,7 +56,7 @@ export default function Login() {
       <div className="login-left">
         <div className="login-left-content">
           <div className="login-logo">
-            <div className="login-logo-icon">♻️</div>
+            <div className="login-logo-icon"></div>
             <span className="login-logo-text">Waste<span>Pro</span></span>
           </div>
 

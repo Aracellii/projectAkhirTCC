@@ -45,6 +45,38 @@
   color: var(--text-subtle);
 }
 
+.form-mode-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.form-cancel-btn {
+  border: 1px solid #93c5fd;
+  background: white;
+  color: #1d4ed8;
+  border-radius: var(--radius-sm);
+  padding: 5px 10px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-body);
+}
+
+.form-cancel-btn:hover {
+  background: #dbeafe;
+}
+
 .field-error {
   display: flex;
   align-items: flex-start;

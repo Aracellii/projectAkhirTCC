@@ -1,11 +1,24 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './AddProductCategory.css';
 
-export default function AddProductCategory({ onCategoryAdded }) {
+export default function AddProductCategory({ onCategoryAdded, editingCategory, onCancelEdit }) {
   const [formData, setFormData] = useState({ name: '', credit_per_kg: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const API_BASE_URL = 'http://localhost:5000/api/v1';
+  const isEditMode = Boolean(editingCategory?.id);
+
+  useEffect(() => {
+    if (!editingCategory) {
+      setFormData({ name: '', credit_per_kg: '' });
+      return;
+    }
+
+    setFormData({
+      name: editingCategory.name || '',
+      credit_per_kg: editingCategory.credit_per_kg ?? '',
+    });
+  }, [editingCategory]);
 
   const getAuthHeader = () => {
     const token = localStorage.getItem('token');
@@ -26,8 +39,13 @@ export default function AddProductCategory({ onCategoryAdded }) {
     }
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/categories`, {
-        method: 'POST',
+      const endpoint = isEditMode
+        ? `${API_BASE_URL}/categories/${editingCategory.id}`
+        : `${API_BASE_URL}/categories`;
+      const method = isEditMode ? 'PUT' : 'POST';
+
+      const response = await fetch(endpoint, {
+        method,
         headers: getAuthHeader(),
         body: JSON.stringify({
           name: formData.name,
@@ -39,6 +57,9 @@ export default function AddProductCategory({ onCategoryAdded }) {
         throw new Error(data.message || 'Gagal menyimpan kategori');
       }
       setFormData({ name: '', credit_per_kg: '' });
+      if (isEditMode) {
+        onCancelEdit();
+      }
       onCategoryAdded();
     } catch (err) {
       setError(err.message || 'Terjadi kesalahan');
@@ -49,8 +70,17 @@ export default function AddProductCategory({ onCategoryAdded }) {
 
   return (
     <form onSubmit={handleSubmit}>
+      {isEditMode && (
+        <div className="form-mode-banner">
+          <span>Edit kategori {editingCategory.name}</span>
+          <button type="button" className="form-cancel-btn" onClick={onCancelEdit}>
+            Batal Edit
+          </button>
+        </div>
+      )}
+
       <div className="form-field">
-        <label htmlFor="cat-name">Nama Kategori *</label>
+        <label htmlFor="cat-name">Nama Kategori</label>
         <input
           type="text"
           id="cat-name"
@@ -88,7 +118,7 @@ export default function AddProductCategory({ onCategoryAdded }) {
             Menyimpan...
           </>
         ) : (
-          '+ Tambah Kategori'
+          isEditMode ? 'Simpan Perubahan Kategori' : '+ Tambah Kategori'
         )}
       </button>
     </form>

@@ -7,6 +7,7 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('donation-location');
   const [locations, setLocations] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [editingLocation, setEditingLocation] = useState(null);
   const [loading, setLoading] = useState(false);
   const API_BASE_URL = 'http://localhost:5000/api/v1';
 
@@ -49,8 +50,12 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-    if (activeTab === 'donation-location') fetchDonationLocations();
-    else if (activeTab === 'product-category') fetchCategories();
+    if (activeTab === 'donation-location') {
+      fetchDonationLocations();
+    } else if (activeTab === 'product-category') {
+      setEditingLocation(null);
+      fetchCategories();
+    }
   }, [activeTab]);
 
   const handleDeleteLocation = async (id) => {
@@ -61,9 +66,75 @@ export default function AdminDashboard() {
         headers: getAuthHeader()
       });
       if (!response.ok) throw new Error('Failed to delete');
+      if (editingLocation?.id === id) {
+        setEditingLocation(null);
+      }
       fetchDonationLocations();
     } catch (error) {
       console.error('Error deleting location:', error);
+    }
+  };
+
+  const handleEditLocation = (location) => {
+    setEditingLocation(location);
+  };
+
+  const handleEditCategory = async (category) => {
+    const name = window.prompt('Nama kategori', category.name);
+    if (name === null) return;
+
+    const creditInput = window.prompt(
+      'Kredit per kg',
+      String(category.credit_per_kg ?? 0)
+    );
+    if (creditInput === null) return;
+
+    const creditValue = parseInt(creditInput, 10);
+    if (Number.isNaN(creditValue) || creditValue < 0) {
+      window.alert('Kredit per kg harus berupa angka >= 0');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/categories/${category.id}`, {
+        method: 'PUT',
+        headers: getAuthHeader(),
+        body: JSON.stringify({
+          name: name.trim(),
+          credit_per_kg: creditValue,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Gagal update kategori');
+      }
+
+      fetchCategories();
+    } catch (error) {
+      console.error('Error updating category:', error);
+      window.alert(error.message || 'Gagal update kategori');
+    }
+  };
+
+  const handleDeleteCategory = async (id) => {
+    if (!window.confirm('Yakin ingin menghapus kategori ini?')) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/categories/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeader(),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Gagal menghapus kategori');
+      }
+
+      fetchCategories();
+    } catch (error) {
+      console.error('Error deleting category:', error);
+      window.alert(error.message || 'Gagal menghapus kategori');
     }
   };
 
@@ -142,10 +213,16 @@ export default function AdminDashboard() {
             <div className="content-grid">
               <div className="card">
                 <div className="card-header">
-                  <span className="card-title">Tambah Lokasi Baru</span>
+                  <span className="card-title">
+                    {editingLocation ? `Edit Lokasi #${editingLocation.id}` : 'Tambah Lokasi Baru'}
+                  </span>
                 </div>
                 <div className="card-body">
-                  <AddDonationLocation onLocationAdded={fetchDonationLocations} />
+                  <AddDonationLocation
+                    onLocationAdded={fetchDonationLocations}
+                    editingLocation={editingLocation}
+                    onCancelEdit={() => setEditingLocation(null)}
+                  />
                 </div>
               </div>
 
@@ -190,6 +267,9 @@ export default function AdminDashboard() {
                             </div>
                           )}
                           <div className="item-footer">
+                            <button className="btn-edit" onClick={() => handleEditLocation(loc)}>
+                              ✏️ Edit
+                            </button>
                             <button className="btn-delete" onClick={() => handleDeleteLocation(loc.id)}>
                               🗑️ Hapus
                             </button>
@@ -244,6 +324,14 @@ export default function AdminDashboard() {
                               <span className="credit-icon"></span>
                               {cat.credit_per_kg} kredit / kg
                             </div>
+                          </div>
+                          <div className="item-footer">
+                            <button className="btn-edit" onClick={() => handleEditCategory(cat)}>
+                              ✏️ Edit
+                            </button>
+                            <button className="btn-delete" onClick={() => handleDeleteCategory(cat.id)}>
+                              🗑️ Hapus
+                            </button>
                           </div>
                         </div>
                       ))}

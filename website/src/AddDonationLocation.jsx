@@ -1,13 +1,37 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './AddDonationLocation.css';
 
-export default function AddDonationLocation({ onLocationAdded }) {
+export default function AddDonationLocation({ onLocationAdded, editingLocation, onCancelEdit }) {
   const [formData, setFormData] = useState({
     name: '', address: '', city: '', latitude: '', longitude: '', is_active: true
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const API_BASE_URL = 'http://localhost:5000/api/v1';
+  const isEditMode = Boolean(editingLocation?.id);
+
+  useEffect(() => {
+    if (!editingLocation) {
+      setFormData({
+        name: '',
+        address: '',
+        city: '',
+        latitude: '',
+        longitude: '',
+        is_active: true,
+      });
+      return;
+    }
+
+    setFormData({
+      name: editingLocation.name || '',
+      address: editingLocation.address || '',
+      city: editingLocation.city || '',
+      latitude: editingLocation.latitude ?? '',
+      longitude: editingLocation.longitude ?? '',
+      is_active: Boolean(editingLocation.is_active),
+    });
+  }, [editingLocation]);
 
   const getAuthHeader = () => {
     const token = localStorage.getItem('token');
@@ -28,8 +52,13 @@ export default function AddDonationLocation({ onLocationAdded }) {
     }
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/donation-locations`, {
-        method: 'POST',
+      const endpoint = isEditMode
+        ? `${API_BASE_URL}/donation-locations/${editingLocation.id}`
+        : `${API_BASE_URL}/donation-locations`;
+      const method = isEditMode ? 'PUT' : 'POST';
+
+      const response = await fetch(endpoint, {
+        method,
         headers: getAuthHeader(),
         body: JSON.stringify({
           name: formData.name,
@@ -45,6 +74,9 @@ export default function AddDonationLocation({ onLocationAdded }) {
         throw new Error(data.message || 'Gagal menyimpan lokasi donasi');
       }
       setFormData({ name: '', address: '', city: '', latitude: '', longitude: '', is_active: true });
+      if (isEditMode) {
+        onCancelEdit();
+      }
       onLocationAdded();
     } catch (err) {
       setError(err.message || 'Terjadi kesalahan');
@@ -55,6 +87,15 @@ export default function AddDonationLocation({ onLocationAdded }) {
 
   return (
     <form onSubmit={handleSubmit}>
+      {isEditMode && (
+        <div className="form-mode-banner">
+          <span>Edit lokasi: {editingLocation.name}</span>
+          <button type="button" className="form-cancel-btn" onClick={onCancelEdit}>
+            Batal Edit
+          </button>
+        </div>
+      )}
+
       <div className="form-field">
         <label htmlFor="loc-name">Nama Lokasi *</label>
         <input
@@ -140,7 +181,7 @@ export default function AddDonationLocation({ onLocationAdded }) {
             Menyimpan...
           </>
         ) : (
-          '+ Tambah Lokasi'
+          isEditMode ? 'Simpan Perubahan Lokasi' : '+ Tambah Lokasi'
         )}
       </button>
     </form>
